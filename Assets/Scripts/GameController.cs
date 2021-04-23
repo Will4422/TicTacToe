@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class GameController : MonoBehaviour
         GameSetUp();
     }
 
+    // initializes variables 
     void GameSetUp() {
         whoTurn = 0;
         turnCount = 0;
@@ -50,6 +52,7 @@ public class GameController : MonoBehaviour
         
     }
 
+    // Function called everytime a player makes a move to place an X or an O
     public void TicTacToeButton(int whichNumber) {
         xPlayersButton.interactable = false;
         oPlayersButton.interactable = false;
@@ -69,6 +72,7 @@ public class GameController : MonoBehaviour
             whoTurn = 1;
             turnIcons[0].SetActive(false);
             turnIcons[1].SetActive(true);
+            AIMakeMove();
         } else {
             whoTurn = 0;
             turnIcons[0].SetActive(true);
@@ -76,6 +80,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+    // returns true if a player has won the game, false otherwise
     bool WinnerCheck() {
         int s1 = markedSpaces[0] + markedSpaces[1] + markedSpaces[2];
         int s2 = markedSpaces[3] + markedSpaces[4] + markedSpaces[5];
@@ -97,6 +102,7 @@ public class GameController : MonoBehaviour
         return false;
     }
 
+    // handles displaying the visuals of a win condition
     void WinnerDisplay(int indexIn) {
         WinnerPanel.gameObject.SetActive(true);
         if(whoTurn == 0) {
@@ -111,6 +117,7 @@ public class GameController : MonoBehaviour
         WinningLines[indexIn].SetActive(true);
     }
 
+    // resets everything except the scores
     public void Rematch() {
         GameSetUp();
         for (int i = 0; i < WinningLines.Length; i++) {
@@ -122,6 +129,7 @@ public class GameController : MonoBehaviour
         catImage.SetActive(false);
     }
 
+    // reset everything - including the scores
     public void Restart() {
         Rematch();
         xPlayersScore = 0;
@@ -130,25 +138,48 @@ public class GameController : MonoBehaviour
         oPlayersScoreText.text = "0";
     }
 
+    // clicking on the player icon allows players to switch who goes first
     public void SwitchPlayer(int whichPlayer) {
-        if (whichPlayer == 0) {
-            whoTurn = 0;
-            turnIcons[0].SetActive(true);
-            turnIcons[1].SetActive(false);
-        } else if (whichPlayer == 1) {
-            whoTurn = 1;
-            turnIcons[0].SetActive(false);
-            turnIcons[1].SetActive(true);
-        }
+        // taking this out for now so that i can safely implement the AI
+
+        // if (whichPlayer == 0) {
+        //     whoTurn = 0;
+        //     turnIcons[0].SetActive(true);
+        //     turnIcons[1].SetActive(false);
+        // } else if (whichPlayer == 1) {
+        //     whoTurn = 1;
+        //     turnIcons[0].SetActive(false);
+        //     turnIcons[1].SetActive(true);
+        // }
     }
 
+    // handles a tie
     void Cat() {
         WinnerPanel.SetActive(true);
         catImage.SetActive(true);
         WinnerText.text = "CAT";
     }
 
+    // plays click sound
     public void PlayButtonClick() {
         buttonClickAudio.Play();
+    }
+
+    // calculate next move and call TicTacToeButton(int) with the chose space to move
+    void AIMakeMove() {
+        int num = GenerateRandomBetween0and9();
+        if (!isMarked(num)) {
+            TicTacToeButton(num);
+        } else {
+            AIMakeMove();
+        }
+    }
+
+    int GenerateRandomBetween0and9() {
+        return Random.Range(0,8);
+    }
+
+    bool isMarked(int num) {
+        return markedSpaces[num] != -100;
     }
 }
